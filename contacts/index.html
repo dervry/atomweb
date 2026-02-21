@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Account</title>
+<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+
+<div class="background"></div>
+
+<div class="card">
+
+    <div class="forms">
+
+        <!-- LOGIN -->
+        <div class="form login active">
+            <h2>Hello!</h2>
+            <p class="sub">Sign in to your account</p>
+
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="loginBtn" class="main-btn">LOG IN</button>
+
+            <div class="divider">OR</div>
+
+          <button id="googleBtn" class="google-btn">
+    <div class="google-icon">
+        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
+    </div>
+    <span>Sign in with Google</span>
+</button>
+            <p class="switch-text">
+                Don't have an account?
+                <span onclick="switchForm()">Create</span>
+            </p>
+        </div>
+
+        <!-- SIGN UP -->
+        <div class="form signup">
+            <h2>Create Account</h2>
+            <p class="sub">Register new account</p>
+
+            <input type="text" id="signupName" placeholder="Full Name">
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="tel" id="signupPhone" placeholder="Contact Number">
+            <input type="text" id="signupAddress" placeholder="Address">
+            <input type="password" id="signupPassword" placeholder="Password">
+
+           <button id="signupBtn">REGISTER</button>
+
+            <p class="switch-text">
+                Already have an account?
+                <button onclick="loginSuccess()">Login</button>
+            </p>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right">
+        <div class="right-content">
+        <video autoplay muted loop playsinline class="video-bg">
+    <source src="bg.mp4" type="video/mp4">
+</video>
+        </div>
+    </div>
+
+</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+import { 
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+
+// 🔥 YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyAZ3znqK2AW31dmDzpP6E3Dpa8uZvpCXSg",
+  authDomain: "atomled-76190.firebaseapp.com",
+  projectId: "atomled-76190",
+  storageBucket: "atomled-76190.firebasestorage.app",
+  messagingSenderId: "432239839608",
+  appId: "1:432239839608:web:72bcbf34f24e1ebc7f208d",
+  measurementId: "G-TJW0T51GMF"
+};
+
+
+
+// INITIALIZE
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const provider = new GoogleAuthProvider();
+
+
+// ==========================
+// SWITCH FORM (FIXED)
+// ==========================
+window.switchForm = function() {
+  document.querySelector(".login").classList.toggle("active");
+  document.querySelector(".signup").classList.toggle("active");
+};
+
+
+// ==========================
+// SIGN UP
+// ==========================
+document.getElementById("signupBtn")
+.addEventListener("click", async (e) => {
+
+  e.preventDefault();
+
+  const name = document.getElementById("signupName").value;
+  const email = document.getElementById("signupEmail").value;
+  const phone = document.getElementById("signupPhone").value;
+  const address = document.getElementById("signupAddress").value;
+  const password = document.getElementById("signupPassword").value;
+
+  try {
+
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      fullName: name,
+      email: email,
+      phone: phone,
+      address: address,
+      createdAt: new Date()
+    });
+
+    alert("Account Created Successfully!");
+    window.location.href = "homepage.html";
+
+  } catch (error) {
+    alert(error.message);
+  }
+
+});
+
+
+// ==========================
+// LOGIN
+// ==========================
+document.getElementById("loginBtn")
+.addEventListener("click", async (e) => {
+
+  e.preventDefault();
+
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    window.location.href = "homepage.html";
+  } catch (error) {
+    alert(error.message);
+  }
+
+});
+
+
+// ==========================
+// GOOGLE LOGIN
+// ==========================
+
+window.googleLogin = async function() {
+  try {
+    await signInWithPopup(auth, provider);
+    window.location.href = "homepage.html";
+  } catch (error) {
+    alert(error.message);
+  }
+};
+document.getElementById("googleBtn")
+.addEventListener("click", async () => {
+
+  try {
+    const result = await signInWithPopup(auth, provider);
+    alert("Google Sign-In Success!");
+    window.location.href = "homepage.html";
+  } catch (error) {
+    alert(error.message);
+    console.log(error);
+  }
+
+});
+
+</script>
+<script>
+</script>
+</script>
+
+</body>
+</html>
+</script>
+</body>
+</html>     
