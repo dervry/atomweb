@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Account</title>
 <link rel="stylesheet" href="style.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
 <body>
@@ -17,21 +16,17 @@
 
         <!-- LOGIN -->
         <div class="form login active">
-            <h2>Hello!</h2>
-            <p class="sub">Sign in to your account</p>
+            <h2 class="typing">Welcome to Atom LED Lights!</h2>
+            <p class="sub">Log in to your account</p>
 
             <input type="email" id="loginEmail" placeholder="Email">
             <input type="password" id="loginPassword" placeholder="Password">
+            <p id="loginError" style="color:red; font-size:14px;"></p>
+            <p class="forgot-text">
+             <span id="forgotPassword">Forgot Password?</span>
+            </p>
             <button id="loginBtn" class="main-btn">LOG IN</button>
 
-            <div class="divider">OR</div>
-
-          <button id="googleBtn" class="google-btn">
-    <div class="google-icon">
-        <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
-    </div>
-    <span>Sign in with Google</span>
-</button>
             <p class="switch-text">
                 Don't have an account?
                 <span onclick="switchForm()">Create</span>
@@ -48,12 +43,12 @@
             <input type="tel" id="signupPhone" placeholder="Contact Number">
             <input type="text" id="signupAddress" placeholder="Address">
             <input type="password" id="signupPassword" placeholder="Password">
-
-           <button id="signupBtn">REGISTER</button>
+          
+           <button id="signupBtn">Register</button>
 
             <p class="switch-text">
                 Already have an account?
-                <button onclick="loginSuccess()">Login</button>
+                <span onclick="switchForm()">Login</span>
             </p>
         </div>
 
@@ -72,12 +67,15 @@
 
 <script type="module">
 
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import { 
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -85,9 +83,9 @@ import {
 import {
   getFirestore,
   doc,
-  setDoc
+  setDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 
 // 🔥 YOUR FIREBASE CONFIG
 const firebaseConfig = {
@@ -118,20 +116,55 @@ window.switchForm = function() {
   document.querySelector(".signup").classList.toggle("active");
 };
 
-
-// ==========================
-// SIGN UP
-// ==========================
 document.getElementById("signupBtn")
 .addEventListener("click", async (e) => {
 
   e.preventDefault();
 
-  const name = document.getElementById("signupName").value;
-  const email = document.getElementById("signupEmail").value;
-  const phone = document.getElementById("signupPhone").value;
-  const address = document.getElementById("signupAddress").value;
+  const name = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const phone = document.getElementById("signupPhone").value.trim();
+  const address = document.getElementById("signupAddress").value.trim();
   const password = document.getElementById("signupPassword").value;
+
+  // ======================
+  // 🔥 VALIDATION
+  // ======================
+
+  if (!name || !email || !phone || !address || !password) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  // Gmail only
+  if (!email.endsWith("@gmail.com")) {
+    alert("Please use a valid Gmail address.");
+    return;
+  }
+
+  // Proper email format check
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailPattern.test(email)) {
+    alert("Invalid email format.");
+    return;
+  }
+
+  // PH phone number (09xxxxxxxxx)
+  const phonePattern = /^09\d{9}$/;
+  if (!phonePattern.test(phone)) {
+    alert("Phone number must be 11 digits and start with 09.");
+    return;
+  }
+
+  // Password minimum
+  if (password.length < 6) {
+    alert("Password must be at least 6 characters.");
+    return;
+  }
+
+  // ======================
+  // 🔥 FIREBASE REGISTER
+  // ======================
 
   try {
 
@@ -139,22 +172,28 @@ document.getElementById("signupBtn")
     const user = userCredential.user;
 
     await setDoc(doc(db, "users", user.uid), {
-      fullName: name,
-      email: email,
-      phone: phone,
-      address: address,
-      createdAt: new Date()
-    });
+  fullName: name,
+  email: email,
+  phone: phone,
+  address: address,
+  role: "user",
+  createdAt: new Date()
+});
 
     alert("Account Created Successfully!");
     window.location.href = "homepage.html";
 
   } catch (error) {
-    alert(error.message);
+
+    if (error.code === "auth/email-already-in-use") {
+      alert("This email is already registered.");
+    } else {
+      alert("Registration failed. Please try again.");
+    }
+
   }
 
 });
-
 
 // ==========================
 // LOGIN
@@ -166,50 +205,52 @@ document.getElementById("loginBtn")
 
   const email = document.getElementById("loginEmail").value;
   const password = document.getElementById("loginPassword").value;
+try {
 
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = "homepage.html";
-  } catch (error) {
-    alert(error.message);
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+
+  if (userDoc.exists()) {
+    const userData = userDoc.data();
+
+    if (userData.role === "admin") {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "homepage.html";
+    }
+
+  } else {
+    alert("User data not found in Firestore.");
   }
+
+} catch (error) {
+  alert(error.message);
+}
 
 });
 
-
-// ==========================
-// GOOGLE LOGIN
-// ==========================
-
-window.googleLogin = async function() {
-  try {
-    await signInWithPopup(auth, provider);
-    window.location.href = "homepage.html";
-  } catch (error) {
-    alert(error.message);
-  }
-};
-document.getElementById("googleBtn")
+document.getElementById("forgotPassword")
 .addEventListener("click", async () => {
 
+  const email = document.getElementById("loginEmail").value;
+
+  if (!email) {
+    alert("Please enter your email first.");
+    return;
+  }
+
   try {
-    const result = await signInWithPopup(auth, provider);
-    alert("Google Sign-In Success!");
-    window.location.href = "homepage.html";
+    await sendPasswordResetEmail(auth, email);
+    alert("Password reset email sent! Check your Gmail.");
   } catch (error) {
     alert(error.message);
-    console.log(error);
   }
 
 });
 
-</script>
-<script>
-</script>
-</script>
-
-</body>
-</html>
+  
 </script>
 </body>
 </html>     

@@ -14,7 +14,6 @@ body{
     overflow:hidden;
 }
 
-/* Animated Red Background */
 .background{
     position:absolute;
     width:100%;
@@ -22,13 +21,7 @@ body{
     background: radial-gradient(circle at 20% 30%, #330000, transparent 50%),
                 radial-gradient(circle at 80% 70%, #550000, transparent 50%),
                 #0a0a0a;
-    animation: moveBg 8s ease-in-out infinite alternate;
-    z-index:0;
-}
-
-@keyframes moveBg{
-    from{ transform: scale(1); }
-    to{ transform: scale(1.1); }
+    
 }
 
 /* CARD */
@@ -43,7 +36,6 @@ body{
     box-shadow:0 20px 50px rgba(0,0,0,0.6);
 }
 
-/* FORMS SIDE */
 .forms{
     width:50%;
     background:#ffffff;
@@ -66,7 +58,7 @@ body{
 
 .sub{
     margin-bottom:25px;
-    color:#666;
+    color:#ff0000;
     font-size:14px;
 }
 
@@ -76,12 +68,12 @@ body{
     margin-bottom:15px;
     border-radius:8px;
     border:1px solid #ccc;
-    color:#000;              /* Mas black yung typed text */
+    color:#000;              
     font-weight:500;
 }
 
 .form input::placeholder {
-    color:#333;              /* Mas dark placeholder */
+    color:#333;             
     font-weight:500;
 }
 
@@ -95,7 +87,7 @@ body{
     padding:12px;
     background:#cc0000;
     border:none;
-    color:white;
+    color:rgb(255, 255, 255);
     border-radius:8px;
     cursor:pointer;
     font-weight:bold;
@@ -111,48 +103,10 @@ body{
     color:#999;
 }
 
-.google-btn{
-    width:100%;
-    padding:10px 15px;
-    background:#000;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    font-weight:600;
-    display:flex;
-    align-items:center;
-    gap:12px;
-    transition:0.3s;
-}
-
-.google-btn:hover{
-    background:#222;
-}
-
-/* Separate icon box */
-.google-icon{
-    width:35px;
-    height:35px;
-    background:white;
-    border-radius:6px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.google-icon img{
-    width:18px;
-    height:18px;
-}
-.google-btn:hover{
-    background:#333;
-}
-
 .switch-text{
     margin-top:20px;
     font-size:14px;
-    color:#555;
+    color:#000000;
 }
 
 .switch-text span{
@@ -179,51 +133,38 @@ body{
     margin-bottom:15px;
 }
 
-/* ========================= */
-/* MOBILE RESPONSIVE FIX */
-/* ========================= */
+.forgot-text {
+    text-align: right;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
 
-@media screen and (max-width: 768px) {
+.forgot-text span {
+    color: #cc0000;
+    cursor: pointer;
+    font-weight: 600;
+}
 
-    body {
-        height: auto;
-        padding: 20px;
-        overflow: auto;
-    }
+.forgot-text span:hover {
+    text-decoration: underline;
+}
 
-    .card {
-        width: 100%;
-        height: auto;
-        flex-direction: column;
-        border-radius: 15px;
-    }
+.typing {
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid #cc0000;
+    font-size: 20px;
+    font-weight: bold;
+    animation: typing 3s steps(30, end) forwards,
+               blink 0.7s infinite;
+}
 
-    .forms {
-        width: 100%;
-        padding: 30px 20px;
-    }
+@keyframes typing {
+    from { width: 0 }
+    to { width: 84% }
+}
 
-    .right {
-        width: 100%;
-        height: 200px;
-        padding: 0;
-    }
-
-    .video-bg {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .form input {
-        padding: 14px;
-        font-size: 16px; /* para hindi mag-zoom sa iPhone */
-    }
-
-    .main-btn,
-    .google-btn {
-        padding: 14px;
-        font-size: 15px;
-    }
-
+@keyframes blink {
+    20% { border-color: transparent }
 }
